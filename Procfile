@@ -1,1 +1,1 @@
-web: java -jar target/dra-ana-bot-1.0-SNAPSHOT.jar
+web: ./mvnw package && java -jar target/dra-ana-bot-1.0-SNAPSHOT.jar
