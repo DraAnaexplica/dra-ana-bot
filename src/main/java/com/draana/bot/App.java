@@ -40,7 +40,7 @@ public class App {
                     saveInteraction(dataSource, userId, username, text, response);
                 }
             }
-            return UpdatesListener.CONFIRM;
+            return 1; // Substituído UpdatesListener.CONFIRM por 1
         });
     }
 
