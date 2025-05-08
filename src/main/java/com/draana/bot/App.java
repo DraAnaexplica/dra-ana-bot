@@ -8,6 +8,8 @@ import org.postgresql.ds.PGSimpleDataSource;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -26,8 +28,7 @@ public class App {
         }
 
         TelegramBot bot = new TelegramBot(TOKEN);
-        PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(DATABASE_URL);
+        PGSimpleDataSource dataSource = configureDataSource();
 
         initDatabase(dataSource);
 
@@ -46,6 +47,29 @@ public class App {
             }
             return 1; // Substituído UpdatesListener.CONFIRM por 1
         });
+    }
+
+    private static PGSimpleDataSource configureDataSource() {
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        try {
+            URI dbUri = new URI(DATABASE_URL.replace("postgres://", "postgresql://"));
+            String username = dbUri.getUserInfo().split(":")[0];
+            String password = dbUri.getUserInfo().split(":")[1];
+            String host = dbUri.getHost();
+            int port = dbUri.getPort();
+            String database = dbUri.getPath().substring(1); // Remove a barra inicial
+
+            dataSource.setServerNames(new String[]{host});
+            dataSource.setPortNumbers(new int[]{port != -1 ? port : 5432}); // Porta padrão do PostgreSQL é 5432
+            dataSource.setDatabaseName(database);
+            dataSource.setUser(username);
+            dataSource.setPassword(password);
+            dataSource.setSslMode("require"); // Render geralmente exige SSL
+        } catch (URISyntaxException e) {
+            System.err.println("Erro ao parsear a URL do banco de dados: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return dataSource;
     }
 
     private static void initDatabase(PGSimpleDataSource dataSource) {
