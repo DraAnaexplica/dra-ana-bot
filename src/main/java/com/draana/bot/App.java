@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.postgresql.ds.PGSimpleDataSource;
 import okhttp3.*;
 
@@ -14,13 +13,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class App {
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String TOKEN = dotenv.get("TELEGRAM_TOKEN");
-    private static final String DATABASE_URL = dotenv.get("DATABASE_URL");
-    private static final String OPENROUTER_API_KEY = dotenv.get("OPENROUTER_API_KEY");
+    private static final String TOKEN = System.getenv("TELEGRAM_TOKEN");
+    private static final String DATABASE_URL = System.getenv("DATABASE_URL");
+    private static final String OPENROUTER_API_KEY = System.getenv("OPENROUTER_API_KEY");
     private static final OkHttpClient client = new OkHttpClient();
 
     public static void main(String[] args) {
+        // Verifica se as variáveis de ambiente estão definidas
+        if (TOKEN == null || DATABASE_URL == null || OPENROUTER_API_KEY == null) {
+            System.err.println("Erro: Uma ou mais variáveis de ambiente não estão definidas.");
+            return;
+        }
+
         TelegramBot bot = new TelegramBot(TOKEN);
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(DATABASE_URL);
